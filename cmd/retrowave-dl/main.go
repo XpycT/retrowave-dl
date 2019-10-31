@@ -4,11 +4,14 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 )
 
 var (
@@ -56,7 +59,7 @@ func getTracks(limit int, out chan *Response) {
 	if res != nil {
 		defer func() {
 			if errR := res.Body.Close(); errR != nil {
-				log.Fatal(err)
+				log.Fatal(errR)
 			}
 		}()
 	}
@@ -101,6 +104,62 @@ func createJson(r *Response) {
 
 }
 
+// DownloadFile will download a url to a local file. It's efficient because it will
+// write as it downloads and not load the whole file into memory.
+func DownloadFile(f string, url string) error {
+
+	// Get the data
+	resp, err := http.Get(url)
+	if resp != nil {
+		defer func() {
+			if errR := resp.Body.Close(); errR != nil {
+				log.Fatal(errR)
+			}
+		}()
+	}
+	if err != nil {
+		return err
+	}
+
+	// Create the file
+	f = filepath.Join(downloadDir, f)
+	out, err := os.Create(f)
+	if out != nil {
+		defer func() {
+			if errf := out.Close(); errf != nil {
+				log.Fatal(errf)
+			}
+		}()
+	}
+	if err != nil {
+		return err
+	}
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	return err
+}
+
+func downloadFiles(r *Response) {
+	var wg sync.WaitGroup
+	for _, track := range r.Body.Tracks {
+		if track.ID == "" {
+			continue
+		}
+		wg.Add(1)
+		name := track.Title + ".mp3"
+		go func(wg *sync.WaitGroup) {
+			if err := DownloadFile(name, baseUrl+track.StreamURL); err != nil {
+				log.Fatal(err)
+			}
+			log.Printf("File '%s' downloaded\n", name)
+			wg.Done()
+		}(&wg)
+		time.Sleep(time.Second)
+	}
+	wg.Wait()
+}
+
 func main() {
 	flag.Parse()
 	dir, err := os.Getwd()
@@ -124,5 +183,8 @@ func main() {
 
 	if *jsonFlag == true {
 		createJson(resp)
+		os.Exit(1)
 	}
+
+	downloadFiles(resp)
 }
