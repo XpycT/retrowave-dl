@@ -58,8 +58,8 @@ func getTracks(limit int, out chan *Response) {
 	res, err := http.DefaultClient.Do(req)
 	if res != nil {
 		defer func() {
-			if errR := res.Body.Close(); errR != nil {
-				log.Fatal(errR)
+			if errr := res.Body.Close(); errr != nil {
+				log.Fatal(errr)
 			}
 		}()
 	}
@@ -91,7 +91,7 @@ func createJson(r *Response) {
 	if b, err := json.MarshalIndent(output, "", "  "); err == nil {
 		if _, errDir := os.Stat(downloadDir); errDir != nil {
 			if errDirMake := os.MkdirAll(downloadDir, os.ModePerm); errDirMake != nil {
-				log.Fatal(err)
+				log.Fatal(errDirMake)
 			}
 		}
 		path := filepath.Join(downloadDir, "soundtracks.json")
@@ -112,8 +112,8 @@ func DownloadFile(f string, url string) error {
 	resp, err := http.Get(url)
 	if resp != nil {
 		defer func() {
-			if errR := resp.Body.Close(); errR != nil {
-				log.Fatal(errR)
+			if errr := resp.Body.Close(); errr != nil {
+				log.Fatal(errr)
 			}
 		}()
 	}
