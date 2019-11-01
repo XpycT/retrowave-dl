@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -18,6 +20,7 @@ var (
 	limitFlag = flag.Int("limit", 2, "tracks number for download")
 	allFlag   = flag.Bool("all", false, "get all possible tracks (ignoring --limit flag)")
 	jsonFlag  = flag.Bool("json", false, "download track list as JSON file")
+	syncFlag  = flag.Bool("sync", false, "synchronize downloaded files")
 	outFlag   = flag.String("out", "", "directory for output")
 
 	downloadDir string
@@ -142,22 +145,40 @@ func DownloadFile(f string, url string) error {
 
 func downloadFiles(r *Response) {
 	var wg sync.WaitGroup
+	var skipNum uint64
+	var downloadNum uint64
 	for _, track := range r.Body.Tracks {
 		if track.ID == "" {
 			continue
 		}
-		wg.Add(1)
 		name := track.Title + ".mp3"
+		// strip slashes
+		name = strings.Replace(name, "/", "\\", -1)
+
+		if *syncFlag == true {
+			if _, err := os.Stat(filepath.Join(downloadDir, name)); err == nil {
+				log.Printf("[SKIP] %s\n", name)
+				atomic.AddUint64(&skipNum, 1)
+				continue
+			}
+		}
+
+		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			if err := DownloadFile(name, baseUrl+track.StreamURL); err != nil {
 				log.Fatal(err)
 			}
-			log.Printf("File '%s' downloaded\n", name)
+			atomic.AddUint64(&downloadNum, 1)
+			log.Printf("[DOWNLOAD] %s\n", name)
 			wg.Done()
 		}(&wg)
 		time.Sleep(time.Second)
 	}
 	wg.Wait()
+
+	downloadNumFinal := atomic.LoadUint64(&downloadNum)
+	skipNumFinal := atomic.LoadUint64(&skipNum)
+	log.Printf("Downloaded: %d, Skiped: %d\n", downloadNumFinal, skipNumFinal)
 }
 
 func main() {
