@@ -2,7 +2,7 @@
 
 Easy download tracks from retrowave.ru radio
 
-![term](./term.svg)
+![](https://cdn.jsdelivr.net/gh/xpyct/retrowave-dl/term.svg)
 
 ## Build
 ```ssh
