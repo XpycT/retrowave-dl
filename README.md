@@ -9,7 +9,7 @@ make build
 
 ## Usage
 
-```bash
+```ssh
 xpyct@xpyct:$ ./retrowave-dl -h
 Usage of ./retrowave-dl:
   -all
@@ -25,7 +25,7 @@ Usage of ./retrowave-dl:
 
 ```
 
-##Examples of usage
+## Examples of usage
 
 Download as JSON file
 ```bash
