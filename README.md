@@ -3,7 +3,7 @@
 Easy download tracks from retrowave.ru radio
 
 ## Build
-```bash
+```ssh
 make build
 ```
 
@@ -28,20 +28,20 @@ Usage of ./retrowave-dl:
 ## Examples of usage
 
 Download as JSON file
-```bash
+```ssh
 retrowave-dl --json --all // output in ./downloads/soundtracks.json
 ```
 
 Download only 10 tracks
-```bash
+```ssh
 retrowave-dl --limit 10 // output in ./downloads/**/*.mp3
 ```
 Download all tracks
-```bash
+```ssh
 retrowave-dl --all // output in ./downloads/**/*.mp3
 ```
 
 Download only new tracks
-```bash
+```ssh
 retrowave-dl --all --sync // output in ./downloads/**/*.mp3
 ```
