@@ -92,11 +92,6 @@ func createJson(r *Response) {
 		})
 	}
 	if b, err := json.MarshalIndent(output, "", "  "); err == nil {
-		if _, errDir := os.Stat(downloadDir); errDir != nil {
-			if errDirMake := os.MkdirAll(downloadDir, os.ModePerm); errDirMake != nil {
-				log.Fatal(errDirMake)
-			}
-		}
 		path := filepath.Join(downloadDir, "soundtracks.json")
 		err = ioutil.WriteFile(path, b, 0644)
 		if err != nil {
@@ -201,6 +196,12 @@ func main() {
 	go getTracks(limit, doneResp)
 
 	resp := <-doneResp
+
+	if _, errDir := os.Stat(downloadDir); errDir != nil {
+		if errDirMake := os.MkdirAll(downloadDir, os.ModePerm); errDirMake != nil {
+			log.Fatal(errDirMake)
+		}
+	}
 
 	if *jsonFlag == true {
 		createJson(resp)
