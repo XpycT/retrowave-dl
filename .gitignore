@@ -19,4 +19,5 @@
 .idea
 soundtracks.json
 downloads/
+/retrowave-dl*
 *.mp3
