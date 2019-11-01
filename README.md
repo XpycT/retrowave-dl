@@ -2,6 +2,8 @@
 
 Easy download tracks from retrowave.ru radio
 
+![term](./term.svg)
+
 ## Build
 ```ssh
 make build
