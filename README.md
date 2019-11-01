@@ -3,11 +3,13 @@
 Easy download tracks from retrowave.ru radio
 
 ## Build
-```make build```
+```bash
+make build
+```
 
 ## Usage
 
-```
+```bash
 xpyct@xpyct:$ ./retrowave-dl -h
 Usage of ./retrowave-dl:
   -all
